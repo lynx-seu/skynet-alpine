@@ -26,7 +26,7 @@ RUN set -ex \
     && cd ${SKYNET_PATH} \
     && rm -rf .git 3rd/lua/*.o 3rd/lua/luac *.md lualib-src Makefile platform.mk \
     && runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
+		scanelf --needed --nobanner --format '%n#p' --recursive 3rd/lua/lua skynet \
 			| tr ',' '\n' \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
