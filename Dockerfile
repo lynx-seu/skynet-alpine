@@ -5,6 +5,7 @@ ENV ROOT        /tmp/app
 ENV SKYNET_PATH /skynet
 ENV LOGGER      nil
 ENV STANDALONE  nil
+ENV MASTER      nil
 ENV HARBOR      0
 ENV PATH="${SKYNET_PATH}:/skynet/3rd/lua:${PATH}"
 
