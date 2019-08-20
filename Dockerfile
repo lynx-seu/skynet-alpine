@@ -8,6 +8,8 @@ ENV STANDALONE  nil
 ENV MASTER      nil
 ENV HARBOR      0
 ENV PATH="${SKYNET_PATH}:/skynet/3rd/lua:${PATH}"
+ENV LUA_PATH="${SKYNET_PATH}/lualib/?.lua;${SKYNET_PATH}/lualib/?/init.lua;./?.lua;./?/init.lua"
+ENV LUA_CPATH="${SKYNET_PATH}/luaclib/?.so;./?.so"
 
 RUN set -ex \
     && apk update && apk upgrade \
@@ -34,5 +36,6 @@ RUN set -ex \
     && apk add --virtual .run-deps $runDeps \
     && apk del .build-deps
 
+
 WORKDIR ${ROOT}
-CMD ["/skynet/skynet", "config"]
+CMD ["skynet", "config"]
