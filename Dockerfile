@@ -27,6 +27,15 @@ RUN set -ex \
         MALLOC_STATICLIB="" SKYNET_DEFINES=-DNOUSE_JEMALLOC \
     && cd ${SKYNET_PATH} \
     && rm -rf .git 3rd/lua/*.o 3rd/lua/luac *.md \
+    \
+    && cd /tmp \
+    && wget https://github.com/hanslub42/rlwrap/releases/download/v0.43/rlwrap-0.43.tar.gz \
+    && tar -zxvf rlwrap-0.43.tar.gz \
+    && cd rlwrap-0.43 \
+    && ./configure && make && make install \
+    && cd /tmp && rm -rf rlwrap-0.43 \
+    \
+    && cd /skynet \
     && runDeps="$( \
         scanelf --needed --nobanner --format '%n#p' --recursive 3rd/lua/lua skynet \
             | tr ',' '\n' \
