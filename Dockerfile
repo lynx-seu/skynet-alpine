@@ -1,15 +1,9 @@
 FROM alpine:latest
 LABEL maintainer="lynx <wyy.hxl@gmail.com>"
 
-ENV ROOT        /tmp/app
-ENV SKYNET_PATH /skynet
-ENV LOGGER      nil
-ENV STANDALONE  nil
-ENV MASTER      nil
-ENV HARBOR      0
-ENV PATH="${SKYNET_PATH}:/skynet/3rd/lua:${PATH}"
-ENV LUA_PATH="${SKYNET_PATH}/lualib/?.lua;${SKYNET_PATH}/lualib/?/init.lua;./?.lua;./?/init.lua"
-ENV LUA_CPATH="${SKYNET_PATH}/luaclib/?.so;./?.so"
+# ENV LUA_VERSION=5.3.5
+# ENV LUAROCKS_VERSION=3.2.1
+ENV PATH="/skynet:${PATH}"
 
 RUN set -ex \
     && apk update && apk upgrade \
@@ -21,13 +15,30 @@ RUN set -ex \
         gcc \
         make \
         musl-dev \
+    \
     && cd / \
     && git clone https://github.com/cloudwu/skynet.git \
     && make linux -C skynet  \
         MALLOC_STATICLIB="" SKYNET_DEFINES=-DNOUSE_JEMALLOC \
-    && cd ${SKYNET_PATH} \
-    && rm -rf .git 3rd/lua/*.o 3rd/lua/luac *.md \
-    \
+    # luarocks
+    # \
+    # && wget -c https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz \
+    #     -O - | tar -xzf - \
+    # && cd lua-${LUA_VERSION} \
+    # && make -j"$(nproc)" linux \
+    # && make install \
+    # && cd .. \
+    # && rm -rf lua-${LUA_VERSION} \
+    # \
+    # && wget https://luarocks.github.io/luarocks/releases/luarocks-${LUAROCKS_VERSION}.tar.gz \
+    #     -O - | tar -xzf - \
+    # && cd luarocks-${LUAROCKS_VERSION} \
+    # && ./configure --with-lua=/usr/local \
+    # && make build \
+    # && make install \
+    # && cd .. \
+    # && rm -rf luarocks-${LUAROCKS_VERSION} \
+    # \
     && cd /tmp \
     && wget https://github.com/hanslub42/rlwrap/releases/download/v0.43/rlwrap-0.43.tar.gz \
     && tar -zxvf rlwrap-0.43.tar.gz \
@@ -37,7 +48,8 @@ RUN set -ex \
     \
     && cd /skynet \
     && runDeps="$( \
-        scanelf --needed --nobanner --format '%n#p' --recursive 3rd/lua/lua skynet \
+        scanelf --needed --nobanner --format '%n#p' \
+            --recursive  /usr/local/bin/lua /skynet/skynet \
             | tr ',' '\n' \
             | sort -u \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
@@ -45,6 +57,6 @@ RUN set -ex \
     && apk add --virtual .run-deps $runDeps \
     && apk del .build-deps
 
+WORKDIR /tmp/app
+ONBUILD CMD ["skynet", "config"]
 
-WORKDIR ${ROOT}
-CMD ["skynet", "config"]
